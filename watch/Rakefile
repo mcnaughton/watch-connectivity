@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+$:.unshift("/Library/RubyMotion/lib")
+require 'motion/project/template/ios-watch-extension'
+
+begin
+  require 'bundler'
+  Bundler.require
+rescue LoadError
+end
+
+Motion::Project::App.setup do |app|
+
+    app.identifier = 'media.mcnaughton.testing.watchapp'
+    app.provisioning_profile = './../profiles/testing_watchkitextension_development.mobileprovision'
+    app.watch_app_config.provisioning_profile = './../profiles/testing_watchapp_development.mobileprovision'
+
+    app.frameworks << 'WatchConnectivity'
+
+end
+
+require 'ib/tasks'
+
+IB::RakeTask.new do |project|
+  project.resource_directories = ['watch_app']
+end
