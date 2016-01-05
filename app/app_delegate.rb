@@ -1,6 +1,6 @@
 class AppDelegate
 
-  attr_accessor :session
+  attr_accessor :currentSession
 
   def application(application, didFinishLaunchingWithOptions:launchOptions)
     rootViewController = UIViewController.alloc.init
@@ -13,15 +13,20 @@ class AppDelegate
     @window.rootViewController = navigationController
     @window.makeKeyAndVisible
 
-    self.session = WCSession.defaultSession
-    self.session.delegate = self
-    self.session.activateSession
+    WCSession.defaultSession.delegate = self
+    self.currentSession = WCSession.defaultSession
+    self.currentSession.activateSession
 
     err = nil
-    self.session.updateApplicationContext([ {
+    self.currentSession.updateApplicationContext([ {
         'url' => 'http://www.bing.com',
         'title' => 'Bing'
       } ], error: err)
+
+    if nil != err
+      NSLog("Could not update application context #{err.inspect}")
+    end
+
     true
   end
 end

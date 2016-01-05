@@ -2,7 +2,7 @@ class InterfaceController < WKInterfaceController
 
   extend IB
 
-  attr_accessor :rowData, :session
+  attr_accessor :rowData, :currentSession
 
   outlet :watchTable, WKInterfaceTable
 
@@ -13,8 +13,9 @@ class InterfaceController < WKInterfaceController
     # Configure interface objects here.
     NSLog("%@ awakeWithContext", self)
 
-    self.session = WCSession.defaultSession
-    self.session.activateSession
+    WCSession.defaultSession.delegate = self
+    self.currentSession = WCSession.defaultSession
+    self.currentSession.activateSession
 
     self.rowData = [
         {
@@ -50,10 +51,10 @@ class InterfaceController < WKInterfaceController
 
   def table(table, didSelectRowAtIndex: rowIndex)
 
-    if nil != self.session && nil != self.session.receivedApplicationContext
-      NSLog("Received application context #{self.session.receivedApplicationContext.inspect}")
+    if nil != self.currentSession && nil != self.currentSession.receivedApplicationContext
+      NSLog("Received application context #{self.currentSession.receivedApplicationContext.inspect}")
     else
-      NSLog("No application context #{self.session.receivedApplicationContext.inspect}")
+      NSLog("No application context #{self.currentSession.receivedApplicationContext.inspect}")
     end
 
     msg = {"goUrl" => self.rowData[rowIndex]["url"]}
@@ -65,7 +66,7 @@ class InterfaceController < WKInterfaceController
       errorHandler = Proc.new { |err|
         NSLog("WatchConnectivity err %@", err.localizedDescription)
       }
-      self.session.sendMessageData(msg, replyHandler: replyHandler, errorHandler: errorHandler)
+      self.currentSession.sendMessageData(msg, replyHandler: replyHandler, errorHandler: errorHandler)
     rescue
       NSLog("WatchConnectivity caught err")
     end
