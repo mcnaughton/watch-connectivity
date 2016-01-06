@@ -13,7 +13,13 @@ class InterfaceController < WKInterfaceController
     # Configure interface objects here.
     NSLog("%@ awakeWithContext", self)
 
-    self.sharedSessionManager = WatchSessionManager.initialize
+    self.sharedSessionManager = WatchSessionManager.new
+
+    cb = Proc.new { |applicationData|
+      self.rowData = applicationData
+      self.reloadTable
+    }
+    self.sharedSessionManager.listen(cb)
 
     self.rowData = [
         {
@@ -23,7 +29,6 @@ class InterfaceController < WKInterfaceController
     ]
     len = self.rowData.count
     self.watchTable.setNumberOfRows(len, withRowType: "dummy")
-
     self.rowData.each_index { |index|
       data = self.rowData[index]
       row = self.watchTable.rowControllerAtIndex(index)
@@ -31,8 +36,21 @@ class InterfaceController < WKInterfaceController
         row.headline.text = data['title']
       end
     }
-
+    self.watchTable.scrollToRowAtIndex(0)
     self
+  end
+
+  def reloadTable
+
+    len = self.rowData.count
+    self.watchTable.setNumberOfRows(len, withRowType: "dummy")
+    self.rowData.each_index { |index|
+      data = self.rowData[index]
+      row = self.watchTable.rowControllerAtIndex(index)
+      if nil != row
+        row.headline.text = data['title']
+      end
+    }
   end
 
   def willActivate
@@ -59,7 +77,7 @@ class InterfaceController < WKInterfaceController
       errorHandler = Proc.new { |err|
         NSLog("WatchConnectivity err %@", err.localizedDescription)
       }
-      self.sharedSessionManager.sendMessageData(msg, replyHandler: replyHandler, errorHandler: errorHandler)
+      self.sharedSessionManager.data(msg, reply: replyHandler, error: errorHandler)
     rescue
       NSLog("WatchConnectivity rescued")
     end

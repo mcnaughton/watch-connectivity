@@ -1,22 +1,38 @@
 class WatchSessionManager < NSObject
 
-  attr_accessor :currentSession
+  attr_accessor :currentSession, :callbacks
 
   def initialize
 
-    if WCSession.isSupported
-      self.currentSession = WCSession.defaultSession
-      self.currentSession.delegate = self
-      self.currentSession.activateSession
-      NSLog("Default WCSession initialized %@", self.currentSession);
-    else
-      NSLog("WCSession not supported");
+    self.currentSession = WCSession.defaultSession
+    self.currentSession.delegate = self
+    self.currentSession.activateSession
+
+    self.callbacks = []
+
+  end
+
+  def listen(callback)
+    self.callbacks << callback
+  end
+
+  def data(data, reply: replyHandler, error: errorHandler)
+    NSLog("DATA %@", data)
+    begin
+      self.currentSession.sendMessageData(data, replyHandler: replyHandler, errorHandler: errorHandler)
+    rescue
+      NSLog("Bad data")
     end
 
   end
 
-  def sendMessageData(msg, replyHandler: replyHandler, errorHandler: errorHandler)
-    self.currentSession.sendMessageData(msg, replyHandler: replyHandler, errorHandler: errorHandler)
+  def message(msg, reply: replyHandler, error: errorHandler)
+    NSLog("MSG %@", msg)
+    begin
+      self.currentSession.sendMessage(msg, replyHandler: replyHandler, errorHandler: errorHandler)
+    rescue
+      NSLog("Bad msg")
+    end
   end
 
   def sessionWatchStateDidChange(session)
@@ -25,6 +41,12 @@ class WatchSessionManager < NSObject
 
   def session(session, didReceiveApplicationContext: applicationContext)
     NSLog("WCSession received application context %@", applicationContext)
+    self.callbacks.each {
+      |cb|
+        if cb.respond_to? 'call'
+          cb.call(applicationContext)
+        end
+    }
   end
 
   def session(session, didReceiveMessage: message, replyHandler: replyHandler)
