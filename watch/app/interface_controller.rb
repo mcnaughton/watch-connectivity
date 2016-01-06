@@ -2,7 +2,7 @@ class InterfaceController < WKInterfaceController
 
   extend IB
 
-  attr_accessor :rowData, :currentSession
+  attr_accessor :rowData, :sharedSessionManager
 
   outlet :watchTable, WKInterfaceTable
 
@@ -13,9 +13,7 @@ class InterfaceController < WKInterfaceController
     # Configure interface objects here.
     NSLog("%@ awakeWithContext", self)
 
-    WCSession.defaultSession.delegate = self
-    self.currentSession = WCSession.defaultSession
-    self.currentSession.activateSession
+    self.sharedSessionManager = SimpleSessionManager.new
 
     self.rowData = [
         {
@@ -51,26 +49,28 @@ class InterfaceController < WKInterfaceController
 
   def table(table, didSelectRowAtIndex: rowIndex)
 
-    if nil != self.currentSession && nil != self.currentSession.receivedApplicationContext
-      NSLog("Received application context #{self.currentSession.receivedApplicationContext.inspect}")
+    if self.sharedSessionManager.reachable
+      NSLog("No reachable watch device found")
     else
-      NSLog("No application context #{self.currentSession.receivedApplicationContext.inspect}")
+
+      msg = {"goUrl" => self.rowData[rowIndex]["url"]}
+      NSLog("Sending msg %@", msg)
+
+      begin
+        replyHandler = Proc.new { |reply|
+          NSLog("WatchConnectivity reply %@", reply)
+        }
+        errorHandler = Proc.new { |err|
+          NSLog("WatchConnectivity err %@", err.localizedDescription)
+        }
+        self.sharedSessionManager.sendMessageData(msg, replyHandler: replyHandler, errorHandler: errorHandler)
+      rescue
+        NSLog("WatchConnectivity rescued")
+      end
+
+      true
     end
 
-    msg = {"goUrl" => self.rowData[rowIndex]["url"]}
-    NSLog("Sending msg %@", msg)
-    begin
-      replyHandler = Proc.new { |reply|
-        NSLog("WatchConnectivity reply %@", reply)
-      }
-      errorHandler = Proc.new { |err|
-        NSLog("WatchConnectivity err %@", err.localizedDescription)
-      }
-      self.currentSession.sendMessageData(msg, replyHandler: replyHandler, errorHandler: errorHandler)
-    rescue
-      NSLog("WatchConnectivity caught err")
-    end
-    return true
   end
 
 end
