@@ -13,7 +13,7 @@ class InterfaceController < WKInterfaceController
     # Configure interface objects here.
     NSLog("%@ awakeWithContext", self)
 
-    self.sharedSessionManager = SimpleSessionManager.new
+    self.sharedSessionManager = WatchSessionManager.initialize
 
     self.rowData = [
         {

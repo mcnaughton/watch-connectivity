@@ -13,9 +13,7 @@ class AppDelegate
     @window.rootViewController = navigationController
     @window.makeKeyAndVisible
 
-    WCSession.defaultSession.delegate = self
-    self.currentSession = WCSession.defaultSession
-    self.currentSession.activateSession
+    self.currentSession = ApplicationSessionManager.new
 
     err = nil
     if self.currentSession.valid

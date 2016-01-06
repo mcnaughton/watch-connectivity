@@ -1,4 +1,4 @@
-class WatchSessionManager < NSObject
+class ApplicationSessionManager < NSObject
 
   attr_accessor :currentSession
 
@@ -15,8 +15,8 @@ class WatchSessionManager < NSObject
 
   end
 
-  def sendMessageData(msg, replyHandler: replyHandler, errorHandler: errorHandler)
-    self.currentSession.sendMessageData(msg, replyHandler: replyHandler, errorHandler: errorHandler)
+  def updateApplicationContext(obj, error: err)
+    self.currentSession.updateApplicationContext(obj, error: err)
   end
 
   def sessionWatchStateDidChange(session)
@@ -41,6 +41,23 @@ class WatchSessionManager < NSObject
 
   def session(session, didReceiveMessageData: data, replyHandler: replyHandler)
     NSLog("WCSession received data w/reply %@", data)
+  end
+
+  def valid
+    if self.currentSession.isPaired && self.currentSession.isWatchAppInstalled
+      true
+    else
+      false
+    end
+    true
+  end
+
+  def reachable
+    if valid() && self.currentSession.isReachable
+      true
+    else
+      false
+    end
   end
 
 end
