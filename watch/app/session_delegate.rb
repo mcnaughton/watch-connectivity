@@ -39,19 +39,17 @@ class SimpleSessionManager < NSObject
     NSLog("WCSession received data w/reply %@", data)
   end
 
+  # Only call on application not watch
   def valid
-    #TODO: Why doesn't self.currentSession.paired exist?
-    # 2016-01-05 16:23:28.572 watch-connectivity WatchKit Extension[57243:4406588]
-    # *** Terminating app due to uncaught exception 'NoMethodError', reason:
-    # 'in `valid': undefined method `paired' for #<WCSession:0xcb13ae0> (NoMethodError)
-    #if self.currentSession.paired && self.currentSession.watchAppInstalled
-    #  true
-    #else
-    #  false
-    #end
+    if self.currentSession.paired && self.currentSession.watchAppInstalled
+      true
+    else
+      false
+    end
     true
   end
 
+  # Only call on application not watch
   def reachable
     if valid && self.currentSession.reachable
       true

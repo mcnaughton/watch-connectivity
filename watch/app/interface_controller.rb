@@ -49,27 +49,22 @@ class InterfaceController < WKInterfaceController
 
   def table(table, didSelectRowAtIndex: rowIndex)
 
-    if self.sharedSessionManager.reachable
-      NSLog("No reachable watch device found")
-    else
+    msg = {"goUrl" => self.rowData[rowIndex]["url"]}
+    NSLog("Sending msg %@", msg)
 
-      msg = {"goUrl" => self.rowData[rowIndex]["url"]}
-      NSLog("Sending msg %@", msg)
-
-      begin
-        replyHandler = Proc.new { |reply|
-          NSLog("WatchConnectivity reply %@", reply)
-        }
-        errorHandler = Proc.new { |err|
-          NSLog("WatchConnectivity err %@", err.localizedDescription)
-        }
-        self.sharedSessionManager.sendMessageData(msg, replyHandler: replyHandler, errorHandler: errorHandler)
-      rescue
-        NSLog("WatchConnectivity rescued")
-      end
-
-      true
+    begin
+      replyHandler = Proc.new { |reply|
+        NSLog("WatchConnectivity reply %@", reply)
+      }
+      errorHandler = Proc.new { |err|
+        NSLog("WatchConnectivity err %@", err.localizedDescription)
+      }
+      self.sharedSessionManager.sendMessageData(msg, replyHandler: replyHandler, errorHandler: errorHandler)
+    rescue
+      NSLog("WatchConnectivity rescued")
     end
+
+    true
 
   end
 

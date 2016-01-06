@@ -18,13 +18,22 @@ class AppDelegate
     self.currentSession.activateSession
 
     err = nil
-    self.currentSession.updateApplicationContext([ {
-        'url' => 'http://www.bing.com',
-        'title' => 'Bing'
-      } ], error: err)
+    if self.currentSession.valid
+      self.currentSession.updateApplicationContext([ {
+          'url' => 'http://www.bing.com',
+          'title' => 'Bing'
+        } ], error: err)
 
-    if nil != err
-      NSLog("Could not update application context #{err.inspect}")
+      if nil != err
+        NSLog("Could not update application context #{err.inspect}")
+      end
+    else
+      NSLog("No valid WCSession found")
+      if self.currentSession.reachable
+        NSLog("Watch app not installed")
+      else
+        NSLog("Not reachable")
+      end
     end
 
     true
